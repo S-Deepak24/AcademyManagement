@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.sql.*, com.academy.db.DBConnection" %>
+<%@ page import="java.util.*, java.sql.*, com.academy.db.DBConnection" %>
 <%
     // Session check
     if (session.getAttribute("loggedIn") == null) {
@@ -9,6 +9,8 @@
     String username = (String) session.getAttribute("username");
 
     // Fetch live counts from DB
+    ArrayList<String[]> topStudents = new ArrayList<>();
+    ArrayList<String[]> backlogStudents = new ArrayList<>();
     int totalStudents = 0, totalCourses = 0,
         totalDepts = 0, totalEnrollments = 0;
     double avgCgpa = 0;
@@ -34,11 +36,40 @@
 
         rs = conn.createStatement().executeQuery(
             "SELECT ROUND(AVG(cgpa),2) FROM students WHERE cgpa > 0");
-        if (rs.next()) avgCgpa = rs.getDouble(1);
+            if (rs.next()) avgCgpa = rs.getDouble(1);
+
+            // Leaderboard — top 3 students by CGPA
+            rs = conn.createStatement().executeQuery(
+                 "SELECT usn, full_name, cgpa FROM students " +
+                 "WHERE cgpa > 0 ORDER BY cgpa DESC LIMIT 3");
+            while (rs.next()) {
+                 topStudents.add(new String[]{
+                     rs.getString("usn"),
+                     rs.getString("full_name"),
+                     rs.getString("cgpa")
+                 });
+            }
+
+            // Backlog — students with any F grade
+            rs = conn.createStatement().executeQuery(
+                 "SELECT DISTINCT s.usn, s.full_name, c.course_code " +
+                 "FROM students s " +
+                 "JOIN enrollments e ON s.student_id = e.student_id " +
+                 "JOIN courses c ON e.course_id = c.course_id " +
+                 "WHERE e.grade = 'F'");
+            while (rs.next()) {
+                 backlogStudents.add(new String[]{
+                     rs.getString("usn"),
+                     rs.getString("full_name"),
+                     rs.getString("course_code")
+                 });
+            }
+
     } catch (Exception e) {
-        out.println("DB Error: " + e.getMessage());
+          out.println("DB Error: " + e.getMessage());
     }
 %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -173,6 +204,51 @@
             <div class="number"><%= avgCgpa %></div>
             <div class="label">Avg CGPA</div>
         </div>
+    </div>
+
+    <% if (!backlogStudents.isEmpty()) { %>
+    <div style="background:#fdedec; border-left:4px solid #c0392b;
+                border-radius:8px; padding:16px 20px; margin-bottom:24px;">
+        <strong style="color:#922b21; font-size:14px;">
+            ⚠️ Students at Risk (<%= backlogStudents.size() %> backlog<%= backlogStudents.size() > 1 ? "s" : "" %>)
+        </strong>
+        <div style="margin-top:8px; font-size:13px; color:#7b241c;">
+            <% for (String[] b : backlogStudents) { %>
+                <div style="padding:4px 0;">
+                    <strong><%= b[0] %></strong> — <%= b[1] %> failed
+                    <strong><%= b[2] %></strong>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+
+    <div style="background:white; border-radius:12px; padding:24px;
+                margin-bottom:24px; box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <h3 style="color:#1F3864; margin-bottom:16px; font-size:16px;">
+            🏆 Top Performers (CGPA)
+        </h3>
+        <% if (topStudents.isEmpty()) { %>
+            <p style="color:#aaa; font-size:13px;">No results computed yet.</p>
+        <% } else {
+            String[] medals = {"🥇", "🥈", "🥉"};
+            for (int i = 0; i < topStudents.size(); i++) {
+                String[] t = topStudents.get(i);
+        %>
+            <div style="display:flex; align-items:center; gap:12px;
+                        padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                <span style="font-size:24px;"><%= medals[i] %></span>
+                <div style="flex:1;">
+                    <div style="font-weight:600; font-size:14px; color:#333;">
+                        <%= t[1] %>
+                    </div>
+                    <div style="font-size:12px; color:#888;"><%= t[0] %></div>
+                </div>
+                <div style="font-size:20px; font-weight:700; color:#1F3864;">
+                    <%= t[2] %>
+                </div>
+            </div>
+        <% } } %>
     </div>
 
     <div class="quick-links">
