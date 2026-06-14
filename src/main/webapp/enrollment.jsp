@@ -291,7 +291,6 @@
                         <td><strong><%= e.get("usn") %></strong></td>
                         <td><%= e.get("fullName") %></td>
                         <td><%= e.get("courseCode") %></td>
-                        <td><%= e.get("courseCode") %></td>
                         <td><%= e.get("instructorName") != null ? e.get("instructorName") : "—" %></td>
                         <td><%= e.get("sem") %></td>
                         <td><%= e.get("marks") != null ?
