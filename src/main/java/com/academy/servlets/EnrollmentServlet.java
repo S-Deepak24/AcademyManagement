@@ -41,10 +41,12 @@ public class EnrollmentServlet extends HttpServlet {
             String sql = "SELECT s.usn, s.full_name, c.course_code, " +
                     "c.course_name, c.credits, e.marks, " +
                     "e.grade, e.grade_points, e.sem, " +
-                    "e.student_id, e.course_id " +
+                    "e.student_id, e.course_id, " +
+                    "i.full_name AS instructor_name " +
                     "FROM enrollments e " +
                     "JOIN students s ON e.student_id = s.student_id " +
                     "JOIN courses c  ON e.course_id  = c.course_id " +
+                    "LEFT JOIN instructors i ON c.instructor_id = i.instructor_id " +
                     "ORDER BY s.usn, c.course_code";
 
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -63,6 +65,7 @@ public class EnrollmentServlet extends HttpServlet {
                 row.put("sem",         rs.getString("sem"));
                 row.put("studentId",   rs.getString("student_id"));
                 row.put("courseId",    rs.getString("course_id"));
+                row.put("instructorName", rs.getString("instructor_name"));
                 enrollmentList.add(row);
             }
 

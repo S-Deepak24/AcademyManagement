@@ -257,6 +257,7 @@
                     <th>USN</th>
                     <th>Student</th>
                     <th>Course</th>
+                    <th>Instructor</th>
                     <th>Sem</th>
                     <th>Marks</th>
                     <th>Grade</th>
@@ -267,7 +268,7 @@
             <tbody>
                 <% if (enrollmentList.isEmpty()) { %>
                     <tr>
-                        <td colspan="8"
+                        <td colspan="9"
                             style="text-align:center;
                                    padding:32px; color:#aaa;">
                             No enrollments found
@@ -290,6 +291,8 @@
                         <td><strong><%= e.get("usn") %></strong></td>
                         <td><%= e.get("fullName") %></td>
                         <td><%= e.get("courseCode") %></td>
+                        <td><%= e.get("courseCode") %></td>
+                        <td><%= e.get("instructorName") != null ? e.get("instructorName") : "—" %></td>
                         <td><%= e.get("sem") %></td>
                         <td><%= e.get("marks") != null ?
                                 e.get("marks") : "—" %></td>
