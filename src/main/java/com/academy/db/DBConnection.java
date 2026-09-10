@@ -9,7 +9,7 @@ public class DBConnection {
     // ── Database credentials ──────────────────────────────
     private static final String URL      = "jdbc:mysql://localhost:3306/academy_db";
     private static final String USER     = "root";
-    private static final String PASSWORD = "Deepak24@2006";
+    private static final String PASSWORD = "your_mysql_password_here";
 
     // ── Get a connection to MySQL ─────────────────────────
     public static Connection getConnection() {
